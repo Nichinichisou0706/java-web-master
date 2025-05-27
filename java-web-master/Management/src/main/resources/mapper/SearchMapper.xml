@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zwj.mapper.SearchMapper">
+
+
+    <insert id="save">
+        insert into search (student_id, teach_id) values (#{studentId}, #{teachId})
+    </insert>
+
+	<update id="update">
+        update search set score = #{score} where id = #{id}
+    </update>
+
+	<delete id="delete">
+        delete from search where id = #{id}
+    </delete>
+
+    <select id="getSearchById" resultType="com.zwj.pojo.Search">
+        select * from search where id = #{id}
+    </select>
+
+    <select id="getScores" resultType="com.zwj.pojo.Search">
+        select s.id as id, c.course_name as courseName, c.course_code as courseCode,
+               s.score as score,
+               u.name as teacherName
+        from search s inner join teach t on s.teach_id = t.id
+            inner join course c on t.course_code = c.course_code
+            inner join user u on t.teacher_id = u.username
+        <where>
+            s.student_id = #{username}
+            <if test="courseName != null and courseName != ''">
+                and c.course_name like concat('%',#{ courseName },'%')
+            </if>
+            <if test="level == 1">
+                and s.score between 0 and 59
+            </if>
+        </where>
+
+    </select>
+
+	<select id="getStuByTeachId" resultType="com.zwj.pojo.Search" parameterType="com.zwj.controller.request.ManageScoreRequest">
+        select s.id as id, s.score as score,
+               u.username as studentId, u.name as studentName
+        from search s inner join user u on s.student_id = u.username
+        <where>
+            s.teach_id = #{id}
+            <if test="studentId != null and studentId != ''">
+                and u.username = #{studentId}
+            </if>
+            <if test="level == 1">
+                and s.score between 0 and 59
+            </if>
+            <if test="level == 2">
+                and s.score between 61 and 100
+            </if>
+            <if test="level == 3">
+                and s.score between 60 and 74
+            </if>
+            <if test="level == 4">
+                and s.score between 75 and 89
+            </if>
+            <if test="level == 5">
+                and s.score between 90 and 100
+            </if>
+        </where>
+    </select>
+
+    <select id="getListByStudentId" resultType="com.zwj.pojo.Search">
+        select * from search where student_id = #{studentID}
+    </select>
+
+
+</mapper>

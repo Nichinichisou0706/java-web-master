@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zwj.mapper.TeachMapper">
+
+    <sql id="teach_course_user_room">
+        select t.id as id, t.teacher_id as teacherId, u.name as teacherName,
+               c.course_name as courseName, c.course_code as courseCode, c.begin as begin, c.end as end, c.status as status,
+               r.id as roomId, r.name as roomName,
+               t.day as day, t.time as time, t.now as now, t.max as max
+        from teach t inner join room r on t.room_id = r.id
+                     inner join course c on t.course_code = c.course_code
+                     inner join user u on t.teacher_id = u.username
+    </sql>
+
+	<update id="updateAdd">
+        update teach set now = now + 1 where id = #{id}
+    </update>
+
+    <update id="updateDelete">
+        update teach set now = now - 1 where id = #{id}
+    </update>
+
+	<select id="listByCondition" resultType="teach">
+        <include refid="teach_course_user_room"/>
+        <where>
+            <if test="teacherId != null and teacherId != ''">
+                t.teacher_id like concat('%',#{ teacherId },'%')
+            </if>
+            <if test="courseCode != null and courseCode != ''">
+                and t.course_code like concat('%',#{ courseCode },'%')
+            </if>
+        </where>
+        order by id
+    </select>
+
+    <select id="list" resultType="com.zwj.pojo.Teach">
+        <include refid="teach_course_user_room"/>
+            order by id
+    </select>
+
+	<select id="getSearchList" resultType="com.zwj.pojo.Teach">
+        select t.id as id, t.teacher_id as teacherId, u.name as teacherName,
+               c.course_name as courseName, c.course_code as courseCode, c.begin as begin, c.end as end,
+               r.id as roomId, r.name as roomName,
+               t.day as day, t.time as time,t.now as now, t.max as max
+        from teach t inner join room r on t.room_id = r.id
+                     inner join course c on t.course_code = c.course_code
+                     inner join user u on t.teacher_id = u.username
+        <where>
+            t.id not in (
+                select teach_id from search where student_id = #{username}
+            ) and (t.now &lt; t.max)
+            <if test="courseName != null and courseName != ''">
+                and c.course_name like concat('%',#{ courseName },'%')
+            </if>
+            <if test="courseCode != null and courseCode != ''">
+                and c.course_code like concat('%',#{ courseCode },'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="getTeachById" resultType="com.zwj.pojo.Teach">
+        <include refid="teach_course_user_room"/>
+        where t.id = #{id}
+    </select>
+
+    <select id="getMySearchList" resultType="com.zwj.pojo.Teach">
+        select s.id as id, t.teacher_id as teacherId, u.name as teacherName,
+            c.course_name as courseName, c.course_code as courseCode, c.begin as begin, c.end as end,
+            r.id as roomId, r.name as roomName,
+            t.day as day, t.time as time,t.now as now, t.max as max
+            from teach t inner join room r on t.room_id = r.id
+                inner join course c on t.course_code = c.course_code
+                inner join user u on t.teacher_id = u.username
+                inner join search s on t.id = s.teach_id
+        <where>
+            t.id in (
+                select teach_id from search where student_id = #{username}
+            )
+            <if test="courseName != null and courseName != ''">
+                and c.course_name like concat('%',#{ courseName },'%')
+            </if>
+            <if test="courseCode != null and courseCode != ''">
+                and c.course_code like concat('%',#{ courseCode },'%')
+            </if>
+                and s.student_id = #{username};
+        </where>
+    </select>
+
+    <select id="getMyTeachList" resultType="com.zwj.pojo.Teach">
+        select t.id as id, t.day as day, t.time as time, t.now as now,
+               c.course_name as courseName, c.course_code as courseCode ,c.begin as begin, c.end as end,
+               r.name as roomName
+            from teach t inner join user u on t.teacher_id = u.username
+                inner join course c on t.course_code = c.course_code
+                inner join room r on t.room_id = r.id
+        where t.teacher_id = #{username}
+    </select>
+
+    <delete id="delete">
+        delete from teach where id = #{id}
+    </delete>
+
+    <insert id="save" parameterType="teach">
+        insert into teach (teacher_id, course_code, day, time, room_id, max)
+            VALUES (#{teacherId}, #{courseCode}, #{day}, #{time}, #{roomId}, #{max})
+    </insert>
+
+    <select id="isRight" resultType="com.zwj.pojo.Teach" parameterType="teach">
+        <include refid="teach_course_user_room"/>
+        where t.room_id = #{roomId} and (c.begin &lt; #{end} or c.end &gt; #{begin})
+            and t.day = #{day} and t.time = #{time}
+    </select>
+
+
+</mapper>

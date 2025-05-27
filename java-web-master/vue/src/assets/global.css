@@ -1,0 +1,10 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #e6e6e6;
+    background-image: url(5.jpg);
+}
+
+* {
+    box-sizing: border-box;
+}
