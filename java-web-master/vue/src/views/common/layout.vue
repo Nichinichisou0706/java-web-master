@@ -31,10 +31,7 @@
             <!--左侧侧边栏导航-->
             <div style="width: 200px; min-height: calc(100vh - 62px); overflow: hidden; margin-right: 2px; background-color: white">
                 <el-menu :default-active="$route.path" router class="el-menu-demo">
-                    <el-menu-item index="/home">
-                        <i class="el-icon-eleme"></i>
-                        <span>首页</span>
-                    </el-menu-item>
+                    
                     <el-submenu index="/user" v-if="user.role === '管理员'">
                         <template slot="title">
                             <i class="el-icon-user"></i>
@@ -55,12 +52,17 @@
                         <el-menu-item index="/course/update"><i class="el-icon-warning"></i> 编辑景点信息 </el-menu-item>
 
                     </el-submenu>
+                    <el-menu-item index="/home" v-if="user.role === '用户'">
+                        <i class="el-icon-eleme"></i>
+                        <span>首页</span>
+                    </el-menu-item>
+                    
                     <el-submenu index="/stu" v-if="user.role === '用户'">
                         <template slot="title">
                             <i class="el-icon-user"></i>
                             <span>用户中心</span>
                         </template>
-                        <el-menu-item index="/stu/list"><i class="el-icon-user"></i> 景点预定 </el-menu-item>
+                        
                         <el-menu-item index="/stu/myCourse"><i class="el-icon-user"></i> 我的行程 </el-menu-item>
                         <el-menu-item index="/stu/myScore"><i class="el-icon-user"></i> 我的购买 </el-menu-item>
                     </el-submenu>

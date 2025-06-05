@@ -47,7 +47,6 @@ const routes = [
         path: 'user/info',
         component: () => import("../views/common/info")
       },
-
       //---------------------------course------------------------
       {
         path: 'course/list',
@@ -100,8 +99,6 @@ const routes = [
         path: 'tea/manageScore',
         component: () => import("../views/tea/manageScore")
       },
-
-
     ]
   },
 ];
@@ -113,18 +110,15 @@ const router = new VueRouter({
 
 import Cookies from 'js-cookie';
 
-
 router.beforeEach((to, from, next) => {
   if (to.path === '/login' || to.path === '/enroll' || to.path === '/forgetPassword') {
     return  next();
   }
   let user = Cookies.get('user');
-  // 增加判断条件
   if (user == null && (to.path !== '/login' || to.path !== '/enroll' || to.path !== '/forgetPassword')){
     return next('/login');
   }
   next();
 });
-
 
 export default router
